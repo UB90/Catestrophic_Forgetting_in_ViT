@@ -1,0 +1,14 @@
+//Count images per class (amazon, dslr, webcam)
+count dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31"
+
+// Export resolution details
+detail dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31" output "D:/Catestrophic_Forgetting_in_ViT/office31_details.csv"
+
+// Check for corrupt images
+verify dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31" corrupt
+
+// Resize to 32x32 and 96x96 (preserves subfolder structure)
+resize dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31" to 32x32, 96x96 outdir "D:/Catestrophic_Forgetting_in_ViT/office31_resized"
+
+// Convert all images to RGB (saves in separate folder)
+convert dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31" to rgb outdir "D:/Catestrophic_Forgetting_in_ViT/office31_rgb"

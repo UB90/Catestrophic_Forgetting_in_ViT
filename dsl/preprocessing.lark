@@ -1,0 +1,34 @@
+// Lark grammar for .imgprep preprocessing DSL
+
+start: (_NL* statement)* _NL*
+
+?statement: count_stmt
+          | detail_stmt
+          | verify_stmt
+          | resize_stmt
+          | convert_stmt
+
+// ── Commands ────────────────────────────────────────────────────────
+
+count_stmt:   "count"   "dataset" PATH
+detail_stmt:  "detail"  "dataset" PATH "output" PATH
+verify_stmt:  "verify"  "dataset" PATH "corrupt"
+resize_stmt:  "resize"  "dataset" PATH "to" resolution_list "outdir" PATH
+convert_stmt: "convert" "dataset" PATH "to" FORMAT "outdir" PATH
+
+// ── Helpers ─────────────────────────────────────────────────────────
+
+resolution_list: RESOLUTION ("," RESOLUTION)*
+RESOLUTION: /\d+x\d+/
+FORMAT: "rgb" | "grayscale"
+PATH: ESCAPED_STRING
+
+// ── Terminals ───────────────────────────────────────────────────────
+
+COMMENT: /\/\/[^\n]*/
+_NL: /(\r?\n[\t ]*)+/
+
+%import common.ESCAPED_STRING
+%import common.WS_INLINE
+%ignore WS_INLINE
+%ignore COMMENT

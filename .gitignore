@@ -1,0 +1,27 @@
+# ── Virtual environments ─────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── Dataset & generated output (too large for git) ──────
+Office-31/
+office31_resized/
+office31_rgb/
+office31_details.csv
+archive.zip
+
+# ── Python bytecode ─────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+
+# ── OS junk ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE / editor ────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
