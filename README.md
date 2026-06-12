@@ -1,5 +1,7 @@
 # Catastrophic Forgetting in Vision Transformers (ViT)
 
+> **🚧 Project Status:** Just started on June 13, 2026. Currently, only a mini-project — a custom image preprocessing DSL — has been committed as a supporting tool for the main research. More components (training, evaluation, analysis) will be added as the project progresses.
+
 Research project investigating catastrophic forgetting in Vision Transformers using the **Office-31** domain adaptation benchmark dataset.
 
 ## Project Structure
