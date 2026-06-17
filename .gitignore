@@ -7,7 +7,10 @@ env/
 Office-31/
 office31_resized/
 office31_rgb/
+office31_renamed/
+resized_office31/
 office31_details.csv
+office31_metadata.csv
 archive.zip
 
 # ── Python bytecode ─────────────────────────────────────

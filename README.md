@@ -9,9 +9,8 @@ Research project investigating catastrophic forgetting in Vision Transformers us
 ```
 Catestrophic_Forgetting_in_ViT/
 ├── dsl/                        # Image Preprocessing DSL
-│   ├── preprocessing.lark      # LALR grammar definition
-│   ├── parser.py               # Lark-based parser
-│   ├── executor.py             # Transformer + Executor (runs DSL actions)
+│   ├── parser.py               # LALR grammar (inline) + Lark transformer
+│   ├── executor.py             # Action dispatcher & image processing functions
 │   ├── main.py                 # CLI entry point
 │   └── test_office31.imgprep   # Example DSL script for Office-31
 ├── Office-31/                  # Dataset (not tracked in git)
@@ -19,7 +18,8 @@ Catestrophic_Forgetting_in_ViT/
 │   ├── dslr/                   #  498 DSLR photos   (31 classes)
 │   └── webcam/                 #  795 webcam images  (31 classes)
 ├── README.md
-└── .gitignore
+├── .gitignore
+└── .venv/                      # Virtual environment (not tracked)
 ```
 
 ## Dataset
@@ -41,21 +41,25 @@ A custom Domain-Specific Language (`.imgprep`) for declarative image preprocessi
 ### Setup
 
 **Prerequisites:**
+
 - Python 3.9+
 - Conda (recommended) or pip
 
 **Using the `vit` conda environment (recommended):**
+
 ```bash
 conda activate vit
 ```
 
 **Dependencies:**
+
 | Package | Version | Purpose |
 |---------|---------|---------|
 | `lark` | ≥ 1.3 | LALR parser for the DSL grammar |
 | `Pillow` | ≥ 9.0 | Image I/O, resize, and conversion |
 
 Install manually if needed:
+
 ```bash
 pip install lark Pillow
 ```
@@ -68,6 +72,7 @@ python main.py <script.imgprep>
 ```
 
 **Example:**
+
 ```bash
 python main.py test_office31.imgprep
 ```
@@ -77,13 +82,13 @@ python main.py test_office31.imgprep
 #### Comments
 
 ```
-// This is a comment (ignored by the parser)
+# This is a comment (lines starting with # are ignored)
 ```
 
 #### `count` — Count images per class
 
 ```
-count dataset "path/to/dataset"
+count "path/to/dataset"
 ```
 
 Walks the dataset directory structure and prints the number of images per domain and class.
@@ -91,7 +96,7 @@ Walks the dataset directory structure and prints the number of images per domain
 #### `detail` — Export image metadata to CSV
 
 ```
-detail dataset "path/to/dataset" output "path/to/output.csv"
+detail "path/to/dataset" to "path/to/output.csv"
 ```
 
 Produces a CSV with columns: `file`, `width`, `height`, `mode` for every image.
@@ -99,7 +104,7 @@ Produces a CSV with columns: `file`, `width`, `height`, `mode` for every image.
 #### `verify` — Check for corrupt images
 
 ```
-verify dataset "path/to/dataset" corrupt
+verify "path/to/dataset"
 ```
 
 Opens and verifies every image; reports any that fail Pillow's integrity check.
@@ -107,36 +112,43 @@ Opens and verifies every image; reports any that fail Pillow's integrity check.
 #### `resize` — Resize images to target resolutions
 
 ```
-resize dataset "path/to/dataset" to 32x32, 96x96 outdir "path/to/output"
+resize "path/to/dataset" to 128x128, 256x256 in "path/to/output"
 ```
 
-Creates a subfolder per resolution (e.g., `output/32x32/`, `output/96x96/`) preserving the original directory hierarchy. Uses Lanczos resampling.
+Creates a subfolder per resolution (e.g., `output/128x128/`, `output/256x256/`) preserving the original directory hierarchy. Uses Lanczos resampling.
 
 #### `convert` — Convert image color mode
 
 ```
-convert dataset "path/to/dataset" to rgb outdir "path/to/output"
+convert "path/to/dataset" to rgb in "path/to/output"
 ```
 
-Supported formats: `rgb`, `grayscale`.
+Supported modes: `rgb`, `grayscale`, `l`, `rgba`.
+
+#### `rename` — Rename and reorganize images
+
+```
+rename "path/to/dataset" to "path/to/output" as png
+```
+
+Renames images sequentially by class (e.g., `keyboard_1.png`, `keyboard_2.png`) and optionally converts to a target format (`png`, `jpg`, `jpeg`, `bmp`, `tiff`). The original directory hierarchy is preserved.
 
 ### Example Script (`test_office31.imgprep`)
 
 ```
-// Count images per class (amazon, dslr, webcam)
-count dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31"
+# Office-31 preprocessing script
 
-// Export resolution details
-detail dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31" output "D:/Catestrophic_Forgetting_in_ViT/office31_details.csv"
+count "D:/Catestrophic_Forgetting_in_ViT/Office-31"
 
-// Check for corrupt images
-verify dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31" corrupt
+detail "D:/Catestrophic_Forgetting_in_ViT/Office-31" to "D:/Catestrophic_Forgetting_in_ViT/office31_metadata.csv"
 
-// Resize to 32x32 and 96x96 (preserves subfolder structure)
-resize dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31" to 32x32, 96x96 outdir "D:/Catestrophic_Forgetting_in_ViT/office31_resized"
+verify "D:/Catestrophic_Forgetting_in_ViT/Office-31"
 
-// Convert all images to RGB (saves in separate folder)
-convert dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31" to rgb outdir "D:/Catestrophic_Forgetting_in_ViT/office31_rgb"
+resize "D:/Catestrophic_Forgetting_in_ViT/Office-31" to 128x128, 256x256 in "D:/Catestrophic_Forgetting_in_ViT/resized_office31"
+
+convert "D:/Catestrophic_Forgetting_in_ViT/Office-31" to rgb in "D:/Catestrophic_Forgetting_in_ViT/office31_rgb"
+
+rename "D:/Catestrophic_Forgetting_in_ViT/Office-31" to "D:/Catestrophic_Forgetting_in_ViT/office31_renamed" as png
 ```
 
 ### Architecture
@@ -146,22 +158,17 @@ convert dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31" to rgb outdir "D:/
     │
     ▼
 ┌──────────────────────┐
-│  PreprocessingParser  │  parser.py — reads .lark grammar, produces parse tree
+│  parser.py            │  Inline LALR grammar + ScriptTransformer
+│  parse_script(text)   │  Parses DSL text → list of action dicts
 └──────────┬───────────┘
-           │  Lark Tree
-           ▼
-┌──────────────────────────────┐
-│  PreprocessingTransformer     │  executor.py — converts tree → action dicts
-└──────────┬───────────────────┘
            │  List[dict]
            ▼
 ┌──────────────────────────────┐
-│  PreprocessingExecutor        │  executor.py — dispatches & runs each action
+│  executor.py                  │  execute(actions) dispatches each action
+│  _do_count / _do_detail /     │  to the appropriate handler function
+│  _do_verify / _do_resize /    │
+│  _do_convert / _do_rename     │
 └──────────────────────────────┘
 ```
 
 ---
-
-## License
-
-This project is for research and educational purposes.
