@@ -78,7 +78,6 @@ function switchTab(tabId) {
     const panels = document.querySelectorAll(".tab-panel");
     panels.forEach(panel => panel.classList.remove("active"));
     
-    const activePanel = document.getElementById(`tab-overview`);
     const targetPanel = document.getElementById(`tab-${tabId}`);
     if (targetPanel) {
         targetPanel.classList.add("active");
