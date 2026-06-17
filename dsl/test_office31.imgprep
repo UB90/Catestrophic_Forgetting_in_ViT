@@ -1,14 +1,14 @@
-//Count images per class (amazon, dslr, webcam)
-count dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31"
+# Office-31 preprocessing script
 
-// Export resolution details
-detail dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31" output "D:/Catestrophic_Forgetting_in_ViT/office31_details.csv"
 
-// Check for corrupt images
-verify dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31" corrupt
+count "D:/Catestrophic_Forgetting_in_ViT/Office-31"
 
-// Resize to 32x32 and 96x96 (preserves subfolder structure)
-resize dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31" to 32x32, 96x96 outdir "D:/Catestrophic_Forgetting_in_ViT/office31_resized"
+detail "D:/Catestrophic_Forgetting_in_ViT/Office-31" to "D:/Catestrophic_Forgetting_in_ViT/office31_metadata.csv"
 
-// Convert all images to RGB (saves in separate folder)
-convert dataset "D:/Catestrophic_Forgetting_in_ViT/Office-31" to rgb outdir "D:/Catestrophic_Forgetting_in_ViT/office31_rgb"
+verify "D:/Catestrophic_Forgetting_in_ViT/Office-31"
+
+resize "D:/Catestrophic_Forgetting_in_ViT/Office-31" to 128x128, 256x256 in "D:/Catestrophic_Forgetting_in_ViT/resized_office31"
+
+convert "D:/Catestrophic_Forgetting_in_ViT/Office-31" to rgb in "D:/Catestrophic_Forgetting_in_ViT/office31_rgb"
+
+rename "D:/Catestrophic_Forgetting_in_ViT/Office-31" to "D:/Catestrophic_Forgetting_in_ViT/office31_renamed" as png
