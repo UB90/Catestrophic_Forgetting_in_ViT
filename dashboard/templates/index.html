@@ -324,20 +324,21 @@
                                         <option value="verify">Verify Integrity</option>
                                         <option value="resize">Resize to Multi-scale</option>
                                         <option value="convert">Convert Formats</option>
+                                        <option value="rename">Rename & Format</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="editor-container">
                                 <textarea id="dsl-code-input" spellcheck="false" aria-label="DSL Script Editor">// Preprocessing script for Office-31
-count dataset "Office-31"
+count "Office-31"
 
-detail dataset "Office-31" output "office31_details.csv"
+detail "Office-31" to "office31_details.csv"
 
-verify dataset "Office-31" corrupt
+verify "Office-31"
 
-resize dataset "Office-31" to 32x32, 96x96 outdir "office31_resized"
+resize "Office-31" to 32x32, 96x96 in "office31_resized"
 
-convert dataset "Office-31" to rgb outdir "office31_rgb"</textarea>
+convert "Office-31" to rgb in "office31_rgb"</textarea>
                             </div>
                             <div class="editor-actions">
                                 <button class="btn btn-secondary" id="btn-parse-script" onclick="parseDSL()">

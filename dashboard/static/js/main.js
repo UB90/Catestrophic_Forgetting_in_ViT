@@ -5,27 +5,32 @@ let projectData = null;
 
 const TEMPLATES = {
     default: `// Preprocessing script for Office-31
-count dataset "Office-31"
+count "Office-31"
 
-detail dataset "Office-31" output "office31_details.csv"
+detail "Office-31" to "office31_details.csv"
 
-verify dataset "Office-31" corrupt
+verify "Office-31"
 
-resize dataset "Office-31" to 32x32, 96x96 outdir "office31_resized"
+resize "Office-31" to 32x32, 96x96 in "office31_resized"
 
-convert dataset "Office-31" to rgb outdir "office31_rgb"`,
+convert "Office-31" to rgb in "office31_rgb"
+
+rename "Office-31" to "office31_renamed" as png`,
 
     count: `// Count domains and categories in Office-31
-count dataset "Office-31"`,
+count "Office-31"`,
 
     verify: `// Verify integrity of all images (checks for truncations and corrupt pixels)
-verify dataset "Office-31" corrupt`,
+verify "Office-31"`,
 
     resize: `// Resize the dataset to target input sizes for ViT models
-resize dataset "Office-31" to 32x32, 96x96 outdir "office31_resized"`,
+resize "Office-31" to 32x32, 96x96 in "office31_resized"`,
 
     convert: `// Convert all images to RGB (strips grayscale or CMYK anomalies)
-convert dataset "Office-31" to rgb outdir "office31_rgb"`
+convert "Office-31" to rgb in "office31_rgb"`,
+
+    rename: `// Rename and copy files converting their file extensions/formats
+rename "Office-31" to "office31_renamed" as png`
 };
 
 // ==========================================================================
@@ -491,5 +496,17 @@ async function simulateAction(action) {
         printTerminal(`  Converting channels...`, "system");
         await new Promise(r => setTimeout(r, 500));
         printTerminal(`  ✓ Converted 4110 images to ${fmt} → ${outdir}`, "success");
+    }
+    
+    else if (action.action === "rename") {
+        const fmt = action.format;
+        const outdir = action.outdir;
+        printTerminal(`  Target format:     .${fmt.toUpperCase()}`, "system");
+        printTerminal(`  Output directory:  ${outdir}`, "system");
+        await new Promise(r => setTimeout(r, 400));
+        
+        printTerminal(`  Copying and renaming files...`, "system");
+        await new Promise(r => setTimeout(r, 500));
+        printTerminal(`  ✓ Copied and renamed 4110 images to ${fmt} → ${outdir}`, "success");
     }
 }

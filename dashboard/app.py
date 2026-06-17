@@ -10,8 +10,9 @@ current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent
 sys.path.append(str(project_root))
 
-from dsl.parser import PreprocessingParser
-from dsl.executor import PreprocessingTransformer, PreprocessingExecutor
+from dsl.parser import GRAMMAR, ScriptTransformer
+from dsl.executor import execute
+from lark import Lark
 
 app = Flask(
     __name__,
@@ -96,11 +97,13 @@ def parse_script():
         return jsonify({"success": False, "error": "Empty script content."})
 
     try:
-        parser = PreprocessingParser()
-        tree = parser.parse(script)
+        # Get raw Lark tree for AST visualization
+        raw_parser = Lark(GRAMMAR, parser="lalr", start="start")
+        tree = raw_parser.parse(script)
         serialized_ast = serialize_lark_node(tree)
         
-        transformer = PreprocessingTransformer()
+        # Transform AST to actions dictionary list
+        transformer = ScriptTransformer()
         actions = transformer.transform(tree)
         
         return jsonify({
@@ -109,7 +112,6 @@ def parse_script():
             "actions": actions
         })
     except Exception as e:
-        # Lark parser exceptions contain detailed error messages
         return jsonify({
             "success": False,
             "error": str(e)
@@ -124,11 +126,11 @@ def run_script():
     if not script:
         return jsonify({"success": False, "error": "Empty script content."})
 
-    # First, validate syntax
+    # Validate syntax
     try:
-        parser = PreprocessingParser()
-        tree = parser.parse(script)
-        transformer = PreprocessingTransformer()
+        raw_parser = Lark(GRAMMAR, parser="lalr", start="start")
+        tree = raw_parser.parse(script)
+        transformer = ScriptTransformer()
         actions = transformer.transform(tree)
     except Exception as e:
         return jsonify({"success": False, "error": f"Compilation Error: {e}"})
@@ -142,9 +144,7 @@ def run_script():
             "error": "Real execution mode requested, but Office-31 dataset directory does not exist locally."
         })
 
-    # If in simulated mode or dataset doesn't exist, we return success with simulation metadata
     if mode == "simulated" or not dataset_exists:
-        # Return the parsed actions list so frontend can simulate execution step-by-step
         return jsonify({
             "success": True,
             "mode": "simulated",
@@ -159,8 +159,7 @@ def run_script():
     sys.stdout = mystdout
     
     try:
-        executor = PreprocessingExecutor(actions)
-        executor.run()
+        execute(actions)
         success = True
         error_msg = None
     except Exception as e:
