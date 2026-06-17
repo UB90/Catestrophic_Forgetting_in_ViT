@@ -5,18 +5,13 @@ import json
 from pathlib import Path
 from flask import Flask, request, jsonify, render_template
 
-# Add parent 'dsl' directory to Python path so we can import parser and executor
+# Add project root to Python path so we can import from 'dsl' folder
 current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent
-sys.path.append(str(project_root / "dsl"))
+sys.path.append(str(project_root))
 
-try:
-    from parser import PreprocessingParser
-    from executor import PreprocessingTransformer, PreprocessingExecutor
-except ImportError as e:
-    print(f"Error importing DSL components: {e}")
-    # Fallback to absolute imports if needed
-    sys.path.append(str(project_root))
+from dsl.parser import PreprocessingParser
+from dsl.executor import PreprocessingTransformer, PreprocessingExecutor
 
 app = Flask(
     __name__,
