@@ -298,14 +298,14 @@ rename "path/to/datset/Office-31" to "path/to/output/office31_renamed" as png
     │
     ▼
 ┌──────────────────────┐
-│  parser.py           │  Inline LALR grammar + ScriptTransformer      |
-│  parse_script(text)  │  Parses DSL text → list of action dicts           |
+│  parser.py           │  Inline LALR grammar + ScriptTransformer      
+│  parse_script(text)  │  Parses DSL text → list of action dicts           
 └──────────┬───────────┘
            │  List[dict]
            ▼
 ┌──────────────────────────────┐
-│  executor.py                 │  execute(actions) dispatches each action         |
-│  _do_count / _do_detail /    │  to the appropriate     handler function               |
+│  executor.py                 │  execute(actions) dispatches each action         
+│  _do_count / _do_detail /    │  to the appropriate     handler function               
 │  _do_verify / _do_resize /   │
 │  _do_convert / _do_rename    │
 └──────────────────────────────┘
