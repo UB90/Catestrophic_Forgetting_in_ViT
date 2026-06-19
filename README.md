@@ -1,26 +1,23 @@
-# Catastrophic Forgetting in Vision Transformers (ViT)
+# ImagePrep_DSL
 
-> **🚧 Project Status:** Just started on June 13, 2026. Currently, only a mini-project — a custom image preprocessing DSL — has been committed as a supporting tool for the main research. More components will be added as the project progresses.
-
-Research project investigating catastrophic forgetting in Vision Transformers using the **Office-31** domain adaptation benchmark dataset.
 
 ## Project Structure
 
 ```
-Catestrophic_Forgetting_in_ViT/
-├── dsl/                        # Image Preprocessing DSL
-│   ├── parser.py               # LALR grammar (inline) + Lark transformer
-│   ├── executor.py             # Action dispatcher & image processing functions
-│   ├── main.py                 # CLI entry point
-│   └── test_office31.imgprep   # Example DSL script for Office-31
-├── Office-31/                  # Dataset (not tracked in git)
-│   ├── amazon/                 # 2817 product images (31 classes)
-│   ├── dslr/                   #  498 DSLR photos   (31 classes)
-│   └── webcam/                 #  795 webcam images  (31 classes)
-├── README.md
-├── .gitignore
-└── .venv/                      # Virtual environment (not tracked)
+ImagePrep_DSL/
+├── main.py              # CLI entry point; parses .imgprep scripts and executes actions
+├── parser.py            # LALR grammar (inline) + Lark transformer; defines DSL syntax
+├── executor.py          # Action dispatcher & image processing functions; implements all DSL commands
+├── test_office31.imgprep  # Example DSL script demonstrating all features on Office-31 dataset
+└── README.md            # This file
 ```
+
+**File Descriptions:**
+
+- **main.py**: Entry point for the CLI. Reads a `.imgprep` script file and orchestrates parsing and execution.
+- **parser.py**: Defines the DSL grammar in LALR format and implements a Lark transformer to convert parsed tokens into action dictionaries.
+- **executor.py**: Contains the action dispatcher and all image processing implementations (count, detail, verify, resize, convert, rename).
+- **test_office31.imgprep**: Example preprocessing script for the Office-31 dataset, demonstrating all DSL commands in sequence.
 
 ## Dataset
 
@@ -91,12 +88,155 @@ python main.py test_office31.imgprep
 count "path/to/dataset"
 ```
 
-Walks the dataset directory structure and prints the number of images per domain and class.
+Walks the dataset directory structure and prints the number of images per domain and class, organized hierarchically:
+- **Domain level**: Total count per domain (e.g., amazon, dslr, webcam)
+- **Class level**: Individual image count per class within each domain
+- **Overall total**: Grand total across all images
+
+**Example output:**
+```
+COUNT path/to/dataset
+  Domain amazon: 2817 images
+    back_pack: 91
+    bike: 87
+    ...
+  Domain dslr: 498 images
+    back_pack: 10
+    ...
+TOTAL: 4110
+```
 
 #### `detail` — Export image metadata to CSV
 
 ```
 detail "path/to/dataset" to "path/to/output.csv"
+```
+
+Exports metadata for all images in the dataset to a CSV file. Each row contains:
+- **file**: Full path to the image
+- **width**: Image width in pixels
+- **height**: Image height in pixels
+- **mode**: Image color mode (e.g., RGB, RGBA, L for grayscale)
+
+**Example:**
+```csv
+file,width,height,mode
+path/to/amazon/back_pack/image1.jpg,1024,768,RGB
+path/to/amazon/back_pack/image2.jpg,800,600,RGB
+```
+
+#### `verify` — Validate image integrity
+
+```
+verify "path/to/dataset"
+```
+
+Validates all images in the dataset using PIL's built-in verification. Detects corrupted or malformed image files. Prints "All images OK" if all images pass validation.
+
+#### `resize` — Resize images to multiple resolutions
+
+```
+resize "path/to/dataset" to RESolution1, RESolution2, ... in "path/to/output"
+```
+
+Resizes all images to specified dimensions. Supports multiple resolutions in a single command. Each resolution creates a subdirectory in the output folder (e.g., `128x128/`, `256x256/`). Uses high-quality Lanczos resampling.
+
+**Example:**
+```
+resize "dataset" to 128x128, 256x256, 512x512 in "resized_output"
+```
+
+Creates:
+```
+resized_output/
+├── 128x128/     (all images resized to 128×128)
+├── 256x256/     (all images resized to 256×256)
+└── 512x512/     (all images resized to 512×512)
+```
+
+#### `convert` — Convert image color mode
+
+```
+convert "path/to/dataset" to MODE in "path/to/output"
+```
+
+Converts all images to a specified color mode. Supported modes:
+- `rgb` or `rgba`: Convert to RGB or RGBA (color)
+- `grayscale` or `l`: Convert to grayscale (single-channel)
+
+Preserves the original directory structure in the output folder.
+
+**Example:**
+```
+convert "dataset" to grayscale in "grayscale_output"
+```
+
+#### `rename` — Rename and reorganize images
+
+```
+rename "path/to/dataset" to "path/to/output" as FORMAT
+```
+
+Renames all images to a consistent format: `ClassName_Index.extension`. Images are renamed per-class in sorted order and output to the specified directory. The directory structure is preserved.
+
+**Example:**
+```
+rename "dataset" to "renamed_output" as png
+```
+
+Input structure:
+```
+dataset/
+└── back_pack/
+    ├── image_a.jpg
+    ├── image_b.jpg
+    └── image_c.jpg
+```
+
+Output structure:
+```
+renamed_output/
+└── back_pack/
+    ├── back_pack_1.png
+    ├── back_pack_2.png
+    └── back_pack_3.png
+```
+
+#### Supported Image Formats
+
+The DSL supports the following image file extensions:
+`.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.tiff`, `.webp`
+
+---
+
+## Example Script
+
+Here is a complete example preprocessing pipeline for the Office-31 dataset:
+
+```
+# Count images in the dataset
+count "Office-31"
+
+# Export metadata to CSV
+detail "Office-31" to "office31_metadata.csv"
+
+# Verify all images are valid
+verify "Office-31"
+
+# Resize to common training sizes
+resize "Office-31" to 128x128, 256x256 in "resized_office31"
+
+# Convert all images to RGB
+convert "Office-31" to rgb in "office31_rgb"
+
+# Rename images with consistent naming and moves the data from original dataset to renamed_folder
+rename "Office-31" to "office31_renamed" as png
+```
+
+Save this as `preprocess.imgprep` and run:
+
+```bash
+python main.py preprocess.imgprep
 ```
 
 Produces a CSV with columns: `file`, `width`, `height`, `mode` for every image.
@@ -138,17 +278,17 @@ Renames images sequentially by class (e.g., `keyboard_1.png`, `keyboard_2.png`) 
 ```
 # Office-31 preprocessing script
 
-count "D:/Catestrophic_Forgetting_in_ViT/Office-31"
+count "path/to/datset/Office-31"
 
-detail "D:/Catestrophic_Forgetting_in_ViT/Office-31" to "D:/Catestrophic_Forgetting_in_ViT/office31_metadata.csv"
+detail "path/to/datset/Office-31" to "path/to/output/office31_metadata.csv"
 
-verify "D:/Catestrophic_Forgetting_in_ViT/Office-31"
+verify "path/to/datset/Office-31"
 
-resize "D:/Catestrophic_Forgetting_in_ViT/Office-31" to 128x128, 256x256 in "D:/Catestrophic_Forgetting_in_ViT/resized_office31"
+resize "path/to/datset/Office-31" to 128x128, 256x256 in "path/to/output/resized_office31"
 
-convert "D:/Catestrophic_Forgetting_in_ViT/Office-31" to rgb in "D:/Catestrophic_Forgetting_in_ViT/office31_rgb"
+convert "path/to/datset/Office-31" to rgb in "Dpath/to/output/office31_rgb"
 
-rename "D:/Catestrophic_Forgetting_in_ViT/Office-31" to "D:/Catestrophic_Forgetting_in_ViT/office31_renamed" as png
+rename "path/to/datset/Office-31" to "path/to/output/office31_renamed" as png
 ```
 
 ### Architecture
@@ -158,16 +298,16 @@ rename "D:/Catestrophic_Forgetting_in_ViT/Office-31" to "D:/Catestrophic_Forgett
     │
     ▼
 ┌──────────────────────┐
-│  parser.py            │  Inline LALR grammar + ScriptTransformer
-│  parse_script(text)   │  Parses DSL text → list of action dicts
+│  parser.py           │  Inline LALR grammar + ScriptTransformer      |
+│  parse_script(text)  │  Parses DSL text → list of action dicts           |
 └──────────┬───────────┘
            │  List[dict]
            ▼
 ┌──────────────────────────────┐
-│  executor.py                  │  execute(actions) dispatches each action
-│  _do_count / _do_detail /     │  to the appropriate handler function
-│  _do_verify / _do_resize /    │
-│  _do_convert / _do_rename     │
+│  executor.py                 │  execute(actions) dispatches each action         |
+│  _do_count / _do_detail /    │  to the appropriate     handler function               |
+│  _do_verify / _do_resize /   │
+│  _do_convert / _do_rename    │
 └──────────────────────────────┘
 ```
 
