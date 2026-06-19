@@ -1,14 +1,13 @@
 # Office-31 preprocessing script
 
+count "path/to/datset/Office-31"
 
-count "D:/Catestrophic_Forgetting_in_ViT/Office-31"
+detail "path/to/datset/Office-31" to "path/to/output/office31_metadata.csv"
 
-detail "D:/Catestrophic_Forgetting_in_ViT/Office-31" to "D:/Catestrophic_Forgetting_in_ViT/office31_metadata.csv"
+verify "path/to/datset/Office-31"
 
-verify "D:/Catestrophic_Forgetting_in_ViT/Office-31"
+resize "path/to/datset/Office-31" to 128x128, 256x256 in "path/to/output/resized_office31"
 
-resize "D:/Catestrophic_Forgetting_in_ViT/Office-31" to 128x128, 256x256 in "D:/Catestrophic_Forgetting_in_ViT/resized_office31"
+convert "path/to/datset/Office-31" to rgb in "Dpath/to/output/office31_rgb"
 
-convert "D:/Catestrophic_Forgetting_in_ViT/Office-31" to rgb in "D:/Catestrophic_Forgetting_in_ViT/office31_rgb"
-
-rename "D:/Catestrophic_Forgetting_in_ViT/Office-31" to "D:/Catestrophic_Forgetting_in_ViT/office31_renamed" as png
+rename "path/to/datset/Office-31" to "path/to/output/office31_renamed" as png
