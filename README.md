@@ -5,10 +5,11 @@
 
 ```
 ImagePrep_DSL/
-├── main.py              # CLI entry point; parses .imgprep scripts and executes actions
-├── parser.py            # LALR grammar (inline) + Lark transformer; defines DSL syntax
-├── executor.py          # Action dispatcher & image processing functions; implements all DSL commands
-├── test_office31.imgprep  # Example DSL script demonstrating all features on Office-31 dataset
+└──dsl
+|    ├── main.py              # CLI entry point; parses .imgprep scripts and executes actions
+|    ├── parser.py            # LALR grammar (inline) + Lark transformer; defines DSL syntax
+|    ├── executor.py          # Action dispatcher & image processing functions; implements all DSL commands
+|    ├── test_office31.imgprep  # Example DSL script demonstrating all features on Office-31 dataset
 └── README.md            # This file
 ```
 
